@@ -19,26 +19,25 @@ public class Index implements Serializable {
 
     private static final long serialVersionUID = 1L;
     // Stores a list of input numbers and set of possible results
-    private Map<List<Integer>, Set<Integer>> index;
+    private Map<List<Integer>, Set<Double>> index;
 
-    public Index() {
-        index = new HashMap<>();
-    }
+    public Index() { index = new HashMap<>(); }
 
     // Gets the results given a list of numbers
-    public Set<Integer> get(List<Integer> list) {
+    public Set<Double> get(List<Integer> list) {
         if (list == null || list.isEmpty()) return new HashSet<>();
         Collections.sort(list);
         return index.containsKey(list) ? index.get(list) : new HashSet<>();
     }
 
-    // Adds a result for a list of numbers
-    public void add(List<Integer> list, int result) {
-        if (list == null || list.isEmpty()) return;
+    // Adds a set of results for a list of numbers
+    public void add(List<Integer> list, Set<Double> results) {
+        if (list == null || list.isEmpty() || 
+            results == null || results.isEmpty()) return;
         Collections.sort(list);
-        Set<Integer> set = index.get(list);
-        if (set == null) set = new HashSet<>();
-        set.add(result);
+        Set<Double> set = index.get(list);
+        if (set == null) set = results;
+        else set.addAll(results);
         index.put(list, set);
     }
 
@@ -53,15 +52,13 @@ public class Index implements Serializable {
             oin = new ObjectInputStream(new GZIPInputStream(fin));
             result = (Index)oin.readObject();
         }
-        catch (IOException e) {
-        }
+        catch (IOException e) { result = null; }
         finally {
             try {
                 if (oin != null) oin.close();
                 else if (fin != null) fin.close();
             }
-            catch (IOException e) {
-            }
+            catch (IOException e) { result = null; }
         }
         return result;
     }
@@ -75,15 +72,13 @@ public class Index implements Serializable {
             oout = new ObjectOutputStream(new GZIPOutputStream(fout));
             oout.writeObject(this);
         }
-        catch (IOException e) {
-        }
+        catch (IOException e) { }
         finally {
             try {
                 if (oout != null) oout.close();
                 else if (fout != null) fout.close();
             }
-            catch (IOException e) {
-            }
+            catch (IOException e) { }
         }
     }
 }
