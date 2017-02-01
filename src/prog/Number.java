@@ -1,31 +1,39 @@
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 import java.lang.Integer;
+import java.io.IOException;
 
 public class Number {
 
+    private static final int NUM_INPUTS = 4;
+
     public static void main(String[] args) {
-        List<Integer> nums = new ArrayList<>(4);
+        List<Integer> nums = new ArrayList<>();
         // Get the four input numbers and check for validity
         validate_inputs(nums, args);
         Collections.sort(nums);
         // Store the results of combinations of numbers in an index
-        Index index = new Index();
+        Index index = null;
+        try { index = Index.load("wgyn_index.db"); }
+        catch (IOException | ClassNotFoundException e) { index = new Index(); }
+        if (index == null) index = new Index();
         // Do the calculations here
-
-        // Actually detect which of the 100 numbers are possible
-        for (int i = 1; i <= 100; i++) {
-            if (index.get(nums).contains(i))
-                System.out.println(i + ": Possible");
-            else System.out.println(i + ": Not Possible");
+        Calculate calc = new Calculate(nums, index);
+        calc.arithmetic();
+        // Detect which of the 100 numbers are possible
+        Set<Double> set = index.get(nums);
+        for (double i = 1; i <= 100; i++) {
+            if (set.contains(i)) System.out.println((int)i + ": Possible");
+            else System.out.println((int)i + ": Not Possible");
         }
     }
 
     private static void validate_inputs(List<Integer> nums, String[] args) {
         // Make sure there are four numbers for inputs
-        if (args.length < nums.size()) invalid_inputs();
-        for (int i = 0; i < nums.size(); i++) {
+        if (args.length < NUM_INPUTS) invalid_inputs();
+        for (int i = 0; i < NUM_INPUTS; i++) {
             // Makes sure inputs are numbers
             try { nums.add(Integer.parseInt(args[i])); }
             catch (NumberFormatException e) { invalid_string(args[i]); }
